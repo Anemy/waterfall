@@ -1,0 +1,15 @@
+.DS_Store
+.idea
+*.iml
+.vscode
+*.log
+node_modules
+npm-debug.log
+lerna-debug.log
+lib
+build
+dist
+coverage
+.tmp
+.imdone/
+local
