@@ -1,17 +1,10 @@
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 class Shape extends Component {
-  static propTypes = {
-    data: PropTypes.object
-  };
-
-  static defaultProps = { };
-
   render() {
     const {
       color, x, y, size
-    } = this.props.data;
+    } = this.props;
 
     return (
       <circle

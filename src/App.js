@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
-import { createGrid } from './utils/grid';
+import { createWaterfall } from './utils/waterfall';
 
-import Grid from './components/Grid';
+import Shapes from './components/Shapes';
 
 class App extends Component {
   componentWillMount() {
@@ -27,7 +27,7 @@ class App extends Component {
       || document.body.clientHeight;
 
     this.setState({
-      grid: createGrid(width, height),
+      shapes: createWaterfall(width, height),
       width,
       height
     });
@@ -35,14 +35,13 @@ class App extends Component {
 
   render() {
     const {
-      grid, width, height
+      shapes, width, height
     } = this.state;
 
     return (
       <div className="App">
-        {/* <h2>{width} x {height}</h2> */}
-        <Grid
-          grid={grid}
+        <Shapes
+          shapes={shapes}
           height={height}
           width={width}
         />
