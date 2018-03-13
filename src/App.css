@@ -26,3 +26,9 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.waterfall-shapes {
+  background: rgb(38, 35, 36);  /* fallback for old browsers */
+  background: -webkit-radial-gradient(ellipse at top, rgb(41, 38, 44), rgb(38, 35, 36));  /* Chrome 10-25, Safari 5.1-6 */
+  background: radial-gradient(ellipse at top, rgb(41, 38, 44), rgb(38, 35, 36)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import { createWaterfall } from './utils/waterfall';
+import { createWaterfalls } from './utils/layout';
 
 import Shapes from './components/Shapes';
 
@@ -27,7 +27,7 @@ class App extends Component {
       || document.body.clientHeight;
 
     this.setState({
-      shapes: createWaterfall(width, height),
+      shapes: createWaterfalls(width, height),
       width,
       height
     });

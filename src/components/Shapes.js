@@ -34,11 +34,20 @@ class Shapes extends Component {
       <svg
         className="waterfall-shapes"
         height={height}
-        style={{
-          backgroundColor: 'rgba(38, 35, 36, 1)'
-        }}
         width={width}
       >
+        <defs>
+        <filter id="white-glow">
+          <feFlood result="flood" floodColor="#ffffff" floodOpacity="1"></feFlood>
+          <feComposite in="flood" result="mask" in2="SourceGraphic" operator="in"></feComposite>
+          <feMorphology in="mask" result="dilated" operator="dilate" radius="5"></feMorphology>
+          <feGaussianBlur in="dilated" result="blurred" stdDeviation="5"></feGaussianBlur>
+          <feMerge>
+              <feMergeNode in="blurred"></feMergeNode>
+              <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+        </defs>
         {this.renderShapes()}
       </svg>
     );

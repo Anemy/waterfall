@@ -8,10 +8,9 @@ class Shape extends Component {
 
     return (
       <circle
+        className="water-drop"
         r={size}
         style={{
-          fill: 'none',
-          strokeWidth: 1,
           stroke: color
         }}
         cx={x}
