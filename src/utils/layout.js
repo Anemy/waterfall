@@ -8,8 +8,8 @@ import {
 } from './random';
 
 export class LayoutProperties {
-  static minAmountOfWaterfalls = 1;
-  static maxAmountOfWaterfalls = 1;
+  static minAmountOfWaterfalls = 4;
+  static maxAmountOfWaterfalls = 10;
 }
 
 // function distortWaterParticles() {

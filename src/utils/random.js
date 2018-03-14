@@ -11,22 +11,20 @@ export function addOrSubtractOne(randomNumber) {
 }
 
 export function getSkewRandom(skew, seeder) {
+  if (skew && skew < 1) {
+    return Math.random() * (1 + ((seeder.random() * (skew / 2)) * (seeder.random() > 0.5 ? -1 : 1)));
+  }
+
   let random = seeder.random();
 
   if (skew) {
-    let skewAmount = skew < 1 ? (1 / skew) : skew;
-
-    for (let i = 0; i < skewAmount - (skewAmount % 1); i++) {
+    for (let i = 0; i < skew - (skew % 1); i++) {
       random = random * seeder.random();
     }
 
-    if (skewAmount % 1 > 0) {
-      random += (seeder.random() * (skewAmount % 1)) / skewAmount *
-        (seeder.random() > 0.5 ? -1 : 1);
-    }
-
-    if (skew < 1) {
-      random = 1 - random;
+    if (skew % 1 > 0) {
+      random *= 1 + (seeder.random() * (skew % 1)) / (skew *
+        (seeder.random() > 0.5 ? -1 : 1));
     }
   }
 
@@ -46,7 +44,7 @@ export function randomNegativeLog(bound, seeder, skew) {
 
 // Only 10 million possible shapes right now... I think that's ok.
 // We can just increase if we need more.
-const defaultSeedRange = 9999999;
+const defaultSeedRange = 65535;
 export function createRandomSeed(range = defaultSeedRange, existingSeed) {
   let randomRange = (range === null) ? defaultSeedRange : (range || 0);
 

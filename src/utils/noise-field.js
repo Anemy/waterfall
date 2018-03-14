@@ -1,3 +1,5 @@
+// import noise from './noise';
+
 export default class NoiseField {
   constructor(width, height, smoothSize) {
     this.width = width;
@@ -11,3 +13,6 @@ export default class NoiseField {
     }
   }
 }
+
+// const field = new NoiseField(1000, 1000, 50);
+// console.log('example noise field:', field);
