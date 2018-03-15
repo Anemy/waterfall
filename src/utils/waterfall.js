@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import MersenneTwister from 'mersennetwister';
 
 import Particle from './particle';
@@ -16,16 +15,17 @@ export class WaterfallStaticProperties {
   static airResistance = 0.7;
   // 0 there's no chance, 1 it'll always hit.
   static randomWinResistanceChance = 1;
-  static windPower = 12;
+  static windPower = 8;
   static ploomWindPowerRatio = 0.5;
-  static windGridsInX = 10;
-  static windGridsInY = 10;
+  static windGridsInX = 6;
+  static windGridsInY = 6;
 
   static sidePaddingRatioToWidth = 0.25;
 
-  static maxParticles = 20000;
-  static minParticles = 400;
-  static particlesInPloomRatio = 2;
+  static maxParticles = 40000;
+  static minParticles = 1000;
+  // 0 is no particles in ploom - 1 is all of them
+  static particlesInPloomRatio = 0.6;
 
   static minXSpreadRatioToWidth = 0.01;
   static maxXSpreadRatioToWidth = 0.04;
@@ -33,6 +33,8 @@ export class WaterfallStaticProperties {
 
   static ploomXSpreadRatioToNormal = 4;
   static ploomXSpreadDeviation = 0.5;
+
+  static particlesToDrawPerCycle = 10;
 }
 
 export default class Waterfall {
@@ -66,8 +68,9 @@ export default class Waterfall {
     // TODO: Add a skew to this.
     const dropParticlesMax = (maxParticles - minParticles);
 
-    this.amountOfDropParticles = minParticles + (dropParticlesMax * seeder.random());
-    this.amountOfPloomParticles = this.amountOfDropParticles * particlesInPloomRatio;
+    this.amountOfParticles = minParticles + (dropParticlesMax * seeder.random());
+    this.amountOfDropParticles = this.amountOfParticles * (1 - particlesInPloomRatio);
+    this.amountOfPloomParticles = this.amountOfParticles * particlesInPloomRatio;
 
     const padding = viewWidth * sidePaddingRatioToWidth;
     this.waterfallX = padding + ((viewWidth - padding * 2) * seeder.random());
@@ -75,10 +78,34 @@ export default class Waterfall {
     this.windGridSizeX = viewWidth / windGridsInX;
     this.windGridSizeY = viewHeight / windGridsInY;
 
-    this.createWaterfallParticles();
+    this.particlesBuilt = 0;
   }
 
-  createWaterfallParticles() {
+  getNewParticles() {
+    const {
+      particlesToDrawPerCycle
+    } = WaterfallStaticProperties;
+
+    const newParticles = [];
+
+    for (let i = 0; i < particlesToDrawPerCycle; i++) {
+      this.particlesBuilt++;
+      if (this.particlesBuilt < this.amountOfDropParticles) {
+        newParticles.push(this.createParticle(this.particlesBuilt / this.amountOfDropParticles));
+      } else if (this.particlesBuilt < this.amountOfParticles) {
+        // Ploom
+        newParticles.push(this.createPloomParticle());
+      } else {
+        // We done.
+        return newParticles;
+      }
+    }
+
+    return newParticles;
+  }
+
+  // Cycle number is -1 that means it's in the ploom
+  createParticle(index) {
     const {
       xSpreadMax,
       seeder,
@@ -88,71 +115,81 @@ export default class Waterfall {
 
     const {
       airResistance,
+      randomWinResistanceChance,
+      windPower,
+      xSpreadDeviation
+    } = WaterfallStaticProperties;
+
+    this.particles = [];
+    let x = this.waterfallX;
+    x += randomNegativeLog(xSpreadMax, seeder, xSpreadDeviation);
+    x += randomNegativeLog(xSpreadMax * index, seeder, xSpreadDeviation); // Slight spread as it gets closer to the bottom.
+
+    let y = this.bottomY * index;
+
+    // Apply the 'wind' (Perlin or Simplex noise field) to the particles.
+    const offset = Math.min(this.viewWidth, this.viewHeight) * 3;
+
+    const angle = Math.PI + (noise.simplex2(x / windGridSizeX, y / windGridSizeY) * Math.PI);
+    let windPush = Math.abs(noise.simplex2((x / windGridSizeX) + offset, (y / windGridSizeY) + offset) * windPower);
+
+    windPush = (seeder.random() > randomWinResistanceChance) ? seeder.random() * randomWinResistanceChance * windPush : windPush;
+    windPush += Math.pow(Math.abs(this.waterfallX - (x + Math.cos(angle) * windPush)), airResistance / 2);
+
+    x += Math.cos(angle) * windPush;
+    y += Math.sin(angle) * windPush;
+
+    // Apply air resistance to water particles that venture far out on the x when they're part of the drop.
+    const airYPush = Math.pow(Math.abs(this.waterfallX - x), airResistance);
+    y -= airYPush;
+
+    return new Particle(x, y);
+  }
+
+  createPloomParticle() {
+    const {
+      xSpreadMax,
+      seeder,
+      windGridSizeX,
+      windGridSizeY
+    } = this;
+
+    const {
       ploomWindPowerRatio,
       randomWinResistanceChance,
       windPower,
-      xSpreadDeviation,
       ploomXSpreadRatioToNormal,
       ploomXSpreadDeviation
     } = WaterfallStaticProperties;
 
-    this.particles = [];
-    for (let i = 0; i < this.amountOfDropParticles; i++) {
-      const index = (i / this.amountOfDropParticles);
-
-      let x = this.waterfallX;
-      x += randomNegativeLog(xSpreadMax, seeder, xSpreadDeviation);
-      x += randomNegativeLog(xSpreadMax * index, seeder, xSpreadDeviation); // Slight spread as it gets closer to the bottom.
-
-      let y = this.bottomY * index;
-
-      const newParticle = new Particle(x, y);
-
-      this.particles.push(newParticle);
-    }
-
     const ploomXSpreadMax = xSpreadMax * ploomXSpreadRatioToNormal;
-    console.log('xSpreadMax', xSpreadMax, 'ploomXSpreadMax', ploomXSpreadMax);
 
-    for (let i = 0; i < this.amountOfPloomParticles; i++) {
-      let y = this.bottomY;
-      y += -randomLog(this.bottomHeight, seeder);
-      y += -randomLog(this.bottomHeight * 3, seeder, 1.5);
-      y += -randomLog(this.bottomHeight * 4, seeder, 1.7);
-      y += -randomLog(this.bottomHeight * 6, seeder, 2);
-      y += randomNegativeLog(this.bottomHeight * 0.25, seeder, 1.5);
+    let y = this.bottomY;
+    y += -randomLog(this.bottomHeight * 2, seeder, 0.2);
+    y += randomNegativeLog(this.bottomHeight * 0.2, seeder, 0.8);
 
-      let x = this.waterfallX;
-      x += randomNegativeLog(ploomXSpreadMax, seeder, ploomXSpreadDeviation);
+    let x = this.waterfallX;
+    x += randomNegativeLog(ploomXSpreadMax, seeder, ploomXSpreadDeviation);
 
-      const newParticle = new Particle(x, y);
-
-      newParticle.isPloom = true;
-
-      this.particles.push(newParticle);
+    if (y > this.bottomY) {
+      x += randomNegativeLog(ploomXSpreadMax, seeder, ploomXSpreadDeviation / 2);
     }
 
-    // Apply the 'wind' (Perlin or Simplex noise field) to the particles.
-    _.each(this.particles, particle => {
-      const offset = Math.min(this.viewWidth, this.viewHeight) * 3;
+    // Apply the 'wind' (Perlin or Simplex noise field) to the particle.
+    const offset = Math.min(this.viewWidth, this.viewHeight) * 3;
 
-      const angle = Math.PI + (noise.simplex2(particle.x / windGridSizeX, particle.y / windGridSizeY) * Math.PI);
-      let windPush = Math.abs(noise.simplex2((particle.x / windGridSizeX) + offset, (particle.y / windGridSizeY) + offset) * windPower);
+    const angle = Math.PI + (noise.simplex2(x / windGridSizeX, y / windGridSizeY) * Math.PI);
+    let windPush = Math.abs(noise.simplex2((x / windGridSizeX) + offset, (y / windGridSizeY) + offset) * windPower);
 
-      windPush = (seeder.random() > randomWinResistanceChance) ? seeder.random() * randomWinResistanceChance * windPush : windPush;
+    windPush = (seeder.random() > randomWinResistanceChance) ? seeder.random() * randomWinResistanceChance * windPush : windPush;
 
-      if (particle.isPloom) {
-        windPush *= ploomWindPowerRatio;
-      }
+    windPush *= ploomWindPowerRatio;
 
-      particle.x += Math.cos(angle) * windPush;
-      particle.y += Math.sin(angle) * windPush;
+    x += Math.cos(angle) * windPush;
+    y += Math.sin(angle) * windPush;
 
-      // Apply air resistance to water particles that venture far out on the x when they're part of the drop.
-      if (!particle.isPloom) {
-        const airYPush = Math.pow(Math.abs(this.waterfallX - particle.x), airResistance);
-        particle.y -= airYPush;
-      }
-    });
+    const newParticle = new Particle(x, y);
+    newParticle.isPloom = true;
+    return newParticle;
   }
 }

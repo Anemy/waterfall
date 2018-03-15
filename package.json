@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "d3": "^4.13.0",
     "lodash": "^4.17.5",
     "mersennetwister": "^0.2.3",
     "react": "^16.2.0",

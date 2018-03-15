@@ -3,13 +3,3 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
-
-.water-drop {
-  /* Use -webkit- only if supporting: Chrome < 54, iOS < 9.3, Android < 4.4.4 */
-  /* -webkit-filter: drop-shadow( 4px 0px 5px red ); 
-          filter: drop-shadow( 4px 0px 5px red ); */
-  /* box-shadow: 5px 10px green;  */
-  /* filter: url(#white-glow); */
-  fill: none;
-  stroke-width: 1;
-}

@@ -8,13 +8,9 @@ import {
 } from './random';
 
 export class LayoutProperties {
-  static minAmountOfWaterfalls = 4;
+  static minAmountOfWaterfalls = 10;
   static maxAmountOfWaterfalls = 10;
 }
-
-// function distortWaterParticles() {
-
-// }
 
 export function createWaterfalls(width, height, rndSeeder, rndSeed) {
   const {
@@ -25,16 +21,14 @@ export function createWaterfalls(width, height, rndSeeder, rndSeed) {
   const seed = rndSeed || createRandomSeed();
   const seeder = rndSeeder || new MersenneTwister(seed);
 
-  let waterfallParticles = [];
+  const waterfalls = [];
   const amountOfWaterfalls = minAmountOfWaterfalls + floorRandom(maxAmountOfWaterfalls, seeder);
 
   for (let i = 0; i < amountOfWaterfalls; i++) {
     const newWaterfall = new Waterfall(width, height, seeder);
 
-    waterfallParticles = waterfallParticles.concat(newWaterfall.particles);
+    waterfalls.push(newWaterfall);
   }
 
-  // distortWaterParticles(waterfallParticles);
-
-  return waterfallParticles;
+  return waterfalls;
 }
