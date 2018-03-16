@@ -45,17 +45,8 @@ export function randomNegativeLog(bound, seeder, skew) {
 // Only 10 million possible shapes right now... I think that's ok.
 // We can just increase if we need more.
 const defaultSeedRange = 65535;
-export function createRandomSeed(range = defaultSeedRange, existingSeed) {
-  let randomRange = (range === null) ? defaultSeedRange : (range || 0);
+export function createRandomSeed(range = defaultSeedRange) {
+  const randomRange = (range === null) ? defaultSeedRange : (range || 0);
 
-  let seed = 1 + Math.floor(Math.random() * randomRange);
-
-  // To avoid repeating seeds.
-  if (existingSeed !== null) {
-    while (seed === existingSeed && range > 2) {
-      seed = 1 + Math.floor(Math.random() * randomRange);
-    }
-  }
-
-  return seed;
+  return 1 + Math.floor(Math.random() * randomRange);
 }

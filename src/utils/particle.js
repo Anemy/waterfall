@@ -1,11 +1,18 @@
 import { createColorString } from './color';
 
-export default class Line {
-  constructor(x, y) {
+export default class Particle {
+  static color = createColorString({
+    h: 40,
+    s: 5,
+    l: 88,
+    a: 1
+  });
+
+  constructor(x, y, size) {
     this.x = x;
     this.y = y;
 
-    this.size = .25;
+    this.size = size;
     this.color = createColorString({
       h: 40,
       s: 5,

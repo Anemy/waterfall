@@ -6,7 +6,7 @@ import { createWaterfalls } from './utils/layout';
 
 import Shapes from './components/Shapes';
 
-const waterfallUpdateTimer = 5;
+const waterfallUpdateTimer = 10;
 
 class App extends Component {
   componentWillMount() {
@@ -27,15 +27,6 @@ class App extends Component {
       this.updateDimensionsTimeout = null;
     }
 
-    if (this.particleMaker) {
-      clearInterval(this.particleMaker);
-      this.particleMaker = null;
-      this.setState({
-        particles: []
-      });
-      d3.select('svg').selectAll('*').remove();
-    }
-
     this.updateDimensionsTimeout = (() => {
       this.updateDimensionsTimeout = null;
 
@@ -44,37 +35,43 @@ class App extends Component {
   }
 
   updateWaterfalls = () => {
-    let newParticles = [];
+    // let newParticles = [];
+
+    // const {
+    //   height, width
+    // } = this.state;
 
     if (Date.now() - this.lastUpdate < waterfallUpdateTimer / 2) {
+      console.log('skip cycle', Date.now() - this.lastUpdate);
+      this.lastUpdate = Date.now();
       return; // Let's catch up and skip this cycle.
     }
 
-    let stillMakingParticles = 0;
-    _.each(this.state.waterfalls, waterfall => {
-      const newFallParticles = waterfall.getNewParticles();
+    this.lastUpdate = Date.now();
 
-      if (newFallParticles.length > 0) {
+    let stillMakingParticles = 0;
+    const svg = d3.select('svg');
+
+    _.each(this.state.waterfalls, waterfall => {
+      const newFallParticles = waterfall.createAndDrawNewParticles(svg);
+
+      if (newFallParticles) {
         stillMakingParticles += 1;
-        newParticles = [...newParticles, ...newFallParticles];
       }
     });
 
     // this.setState({
     //   particles: [...this.state.particles, ...newParticles]
     // });
-    const svg = d3.select('svg');
-    _.each(newParticles, particle => {
-      svg.append('circle').attr('cx', particle.x).attr('cy', particle.y).attr('r', 0.25).style('stroke', 'white').style('stroke-width', 1);
-    });
+    // _.each(newParticles, particle => {
+    //   svg.append('circle').attr('cx', particle.x).attr('cy', particle.y).attr('r', particle.size).style('stroke', particle.color).style('stroke-width', 1);
+    // });
 
     if (stillMakingParticles === 0) {
-      console.log('done');
+      console.log('Clear particle maker, done drawing.');
       clearInterval(this.particleMaker);
       this.particleMaker = null;
     }
-
-    this.lastUpdate = Date.now();
   }
 
   actuallyUpdateDimensions() {
@@ -93,6 +90,15 @@ class App extends Component {
       height
     });
 
+    if (this.particleMaker) {
+      console.log('Clear particle maker, update dimensions.');
+      clearInterval(this.particleMaker);
+      this.particleMaker = null;
+      this.setState({
+        particles: []
+      });
+      d3.select('svg').selectAll('*').remove();
+    }
     this.particleMaker = setInterval(this.updateWaterfalls, waterfallUpdateTimer);
   }
 
