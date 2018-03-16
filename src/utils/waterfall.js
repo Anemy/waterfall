@@ -229,7 +229,7 @@ export default class Waterfall {
     const size = ploomParticleSizeRatio * (minParticleSize + (seeder.random() * (maxParticleSize - minParticleSize)));
 
     if (x > 0 && x < viewWidth && y < viewHeight && y > 0) {
-      svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('stroke', Particle.createRandomParticleColor(seeder)).style('stroke-width', 1);
+      svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('stroke', Particle.createRandomPloomParticleColor(seeder)).style('stroke-width', 1);
     }
 
     // const newParticle = new Particle(x, y, size);

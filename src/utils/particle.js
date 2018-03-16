@@ -13,6 +13,12 @@ export default class Particle {
     l: [66, 34]
   }
 
+  static ploomColorRange = {
+    h: [0, 360],
+    s: [0, 8],
+    l: [90, 10]
+  }
+
   static color = createColorString({
     h: 40,
     s: 5,
@@ -40,6 +46,15 @@ export default class Particle {
       h: Particle.colorRange.h[0] + (seeder.random() * Particle.colorRange.h[1]),
       s: Particle.colorRange.s[0] + (seeder.random() * Particle.colorRange.s[1]),
       l: Particle.colorRange.l[0] + (seeder.random() * Particle.colorRange.l[1]),
+      a: 1
+    });
+  }
+
+  static createRandomPloomParticleColor(seeder) {
+    return createColorString({
+      h: Particle.ploomColorRange.h[0] + (seeder.random() * Particle.ploomColorRange.h[1]),
+      s: Particle.ploomColorRange.s[0] + (seeder.random() * Particle.ploomColorRange.s[1]),
+      l: Particle.ploomColorRange.l[0] + (seeder.random() * Particle.ploomColorRange.l[1]),
       a: 1
     });
   }
