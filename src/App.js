@@ -9,11 +9,13 @@ import Shapes from './components/Shapes';
 const waterfallUpdateTimer = 10;
 
 class App extends Component {
-  componentWillMount() {
-    this.actuallyUpdateDimensions();
+  state = {
+    height: 100,
+    width: 100
   }
-
+  
   componentDidMount() {
+    this.actuallyUpdateDimensions();
     window.addEventListener('resize', this.updateDimensions.bind(this));
   }
 
@@ -107,16 +109,17 @@ class App extends Component {
 
   render() {
     const {
-      particles, width, height
+      width, height
     } = this.state;
 
     return (
       <div className="App">
-        <Shapes
+        <svg height={height} width={width} className="waterfall-shapes"/>
+        {/* <Shapes
           shapes={particles}
           height={height}
           width={width}
-        />
+        /> */}
       </div>
     );
   }
