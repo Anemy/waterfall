@@ -34,7 +34,7 @@ export class WaterfallStaticProperties {
 
   // Each particle in drop displacement impacts the center by it's 1/particles * this.
   // Also impacted by the size. Max particles are half as impacted.
-  static mainTrailFollowWindAmount = 0.005;
+  static mainTrailFollowWindAmount = 0.004;
 
   static ploomXSpreadRatioToNormal = 4;
   static ploomXSpreadDeviation = 0.5;
@@ -141,7 +141,6 @@ export default class Waterfall {
       randomWinResistanceChance,
       windPower,
       xSpreadDeviation,
-      mainTrailFollowWindAmount,
 
       minParticleSize,
       maxParticleSize
