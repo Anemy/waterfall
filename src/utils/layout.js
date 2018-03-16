@@ -8,8 +8,8 @@ import {
 } from './random';
 
 export class LayoutProperties {
-  static minAmountOfWaterfalls = 7;
-  static maxAmountOfWaterfalls = 7;
+  static minAmountOfWaterfalls = 10;
+  static maxAmountOfWaterfalls = 10;
 }
 
 export function createWaterfalls(width, height, rndSeeder, rndSeed) {

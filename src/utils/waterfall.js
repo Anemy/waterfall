@@ -23,10 +23,10 @@ export class WaterfallStaticProperties {
 
   static sidePaddingRatioToWidth = 0.25;
 
-  static maxParticles = 120000;
+  static maxParticles = 80000;
   static minParticles = 2000;
   // 0 is no particles in ploom - 1 is all of them
-  static particlesInPloomRatio = 0.6;
+  static particlesInPloomRatio = 0.5;
 
   static minXSpreadRatioToWidth = 0.01;
   static maxXSpreadRatioToWidth = 0.07;
@@ -37,7 +37,7 @@ export class WaterfallStaticProperties {
   static mainTrailFollowWindAmount = 0.004;
 
   static ploomXSpreadRatioToNormal = 4;
-  static ploomXSpreadDeviation = 0.5;
+  static ploomXSpreadDeviation = 0.6;
 
   static particlesToDrawPerCycle = 100;
 
