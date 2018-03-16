@@ -10,7 +10,7 @@ export default class Particle {
     // l: [0, 50]
     h: [0, 360],
     s: [0, 10],
-    l: [50, 50]
+    l: [66, 34]
   }
 
   static color = createColorString({
