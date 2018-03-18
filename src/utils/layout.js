@@ -3,13 +3,12 @@ import MersenneTwister from 'mersennetwister';
 import Waterfall from './waterfall';
 
 import {
-  createRandomSeed,
-  floorRandom
+  createRandomSeed
 } from './random';
 
 export class LayoutProperties {
-  static minAmountOfWaterfalls = 10;
-  static maxAmountOfWaterfalls = 10;
+  static minAmountOfWaterfalls = 5;
+  static maxAmountOfWaterfalls = 15;
 }
 
 export function createWaterfalls(width, height, rndSeeder, rndSeed) {
@@ -22,7 +21,7 @@ export function createWaterfalls(width, height, rndSeeder, rndSeed) {
   const seeder = rndSeeder || new MersenneTwister(seed);
 
   const waterfalls = [];
-  const amountOfWaterfalls = minAmountOfWaterfalls + floorRandom(maxAmountOfWaterfalls, seeder);
+  const amountOfWaterfalls = minAmountOfWaterfalls + Math.round(maxAmountOfWaterfalls - minAmountOfWaterfalls, seeder.random());
 
   for (let i = 0; i < amountOfWaterfalls; i++) {
     const newWaterfall = new Waterfall(width, height, seeder);

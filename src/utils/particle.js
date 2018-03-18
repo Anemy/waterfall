@@ -13,7 +13,7 @@ export default class Particle {
     l: [66, 34]
   }
 
-  static ploomColorRange = {
+  static ploomColorRange = Particle.colorRange || {
     h: [0, 360],
     s: [0, 8],
     l: [90, 10]

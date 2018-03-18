@@ -44,7 +44,6 @@ class App extends Component {
     // } = this.state;
 
     if (Date.now() - this.lastUpdate < waterfallUpdateTimer / 2) {
-      console.log('skip cycle', Date.now() - this.lastUpdate);
       this.lastUpdate = Date.now();
       return; // Let's catch up and skip this cycle.
     }
@@ -70,9 +69,11 @@ class App extends Component {
     // });
 
     if (stillMakingParticles === 0) {
-      console.log('Clear particle maker, done drawing.');
-      clearInterval(this.particleMaker);
-      this.particleMaker = null;
+      // console.log('Clear particle maker, done drawing.');
+      if (this.particleMaker) {
+        clearInterval(this.particleMaker);
+        this.particleMaker = null;
+      }
     }
   }
 
@@ -104,6 +105,7 @@ class App extends Component {
     this.particleMaker = setInterval(this.updateWaterfalls, waterfallUpdateTimer);
   }
 
+  updateCounter = 0;
   particleMaker = null;
   updateDimensionsTimeout = null;
 

@@ -23,8 +23,11 @@ export class WaterfallStaticProperties {
 
   static sidePaddingRatioToWidth = 0.25;
 
-  static maxParticles = 80000;
-  static minParticles = 2000;
+  static maxParticles = 160000;
+  static minParticles = 20000;
+  // Negative it's usually a max particle, higher numbers are closer to min.
+  // 0 is random
+  static particleAmountTrend = 0.001;
   // 0 is no particles in ploom - 1 is all of them
   static particlesInPloomRatio = 0.5;
 
@@ -32,20 +35,23 @@ export class WaterfallStaticProperties {
   static maxXSpreadRatioToWidth = 0.07;
   static xSpreadDeviation = 1.1;
 
-  // Each particle in drop displacement impacts the center by it's 1/particles * this.
-  // Also impacted by the size. Max particles are half as impacted.
-  static mainTrailFollowWindAmount = 0.004;
+  // The trail can deviate this far over the course of it's life.
+  static maxTrailFollowWindAmountToWidth = 0.01;
 
   static ploomXSpreadRatioToNormal = 4;
-  static ploomXSpreadDeviation = 0.6;
+  static ploomXSpreadDeviation = 0.7;
 
   static particlesToDrawPerCycle = 100;
 
-  static minParticleSize = 0.001;
-  static maxParticleSize = 0.2;
+  static minParticleSize = 0.1;
+  static maxParticleSize = 0.8;
 
   // Times normal
-  static ploomParticleSizeRatio = 2.5;
+  static ploomParticleSizeRatio = 1.2;
+
+  static chanceOfLineParticles = 0.4;
+  static chanceOfLineParticlesPloom = 0.3;
+  static lineDistanceToWindRatio = 0.25;
 }
 
 export default class Waterfall {
@@ -54,13 +60,14 @@ export default class Waterfall {
       windGridsInX,
       windGridsInY,
 
-      mainTrailFollowWindAmount,
+      maxTrailFollowWindAmountToWidth,
 
       minXSpreadRatioToWidth,
       maxXSpreadRatioToWidth,
 
       minParticles,
       maxParticles,
+      particleAmountTrend,
       particlesInPloomRatio,
 
       sidePaddingRatioToWidth
@@ -81,7 +88,7 @@ export default class Waterfall {
     // TODO: Add a skew to this.
     const dropParticlesMax = (maxParticles - minParticles);
 
-    this.amountOfParticles = minParticles + (dropParticlesMax * seeder.random());
+    this.amountOfParticles = minParticles + ((particleAmountTrend > 0 ? 0 : -dropParticlesMax ) + randomLog(dropParticlesMax, seeder, particleAmountTrend));
     this.amountOfDropParticles = this.amountOfParticles * (1 - particlesInPloomRatio);
     this.amountOfPloomParticles = this.amountOfParticles * particlesInPloomRatio;
 
@@ -93,7 +100,7 @@ export default class Waterfall {
 
     this.particlesBuilt = 0;
 
-    this.followTrailForWindAmount = mainTrailFollowWindAmount * (1 - (this.amountOfParticles / maxParticles));
+    this.followTrailForWindAmount = (maxTrailFollowWindAmountToWidth * viewWidth) / this.amountOfDropParticles;// * (this.amountOfDropParticles / maxParticles);
   }
 
   createAndDrawNewParticles(svg) {
@@ -127,10 +134,9 @@ export default class Waterfall {
       viewWidth,
       viewHeight,
 
-      amountOfDropParticles,
-      amountOfParticles,
       xSpreadMax,
       seeder,
+
       windGridSizeX,
       windGridSizeY,
       followTrailForWindAmount
@@ -143,7 +149,10 @@ export default class Waterfall {
       xSpreadDeviation,
 
       minParticleSize,
-      maxParticleSize
+      maxParticleSize,
+
+      chanceOfLineParticles,
+      lineDistanceToWindRatio
     } = WaterfallStaticProperties;
 
     this.particles = [];
@@ -163,17 +172,30 @@ export default class Waterfall {
     const preXForce = x + (Math.cos(angle) * windPush);
     windPush += Math.pow(Math.abs(this.waterfallX - preXForce), airResistance / 2) * (preXForce > 0 ? 1 : -1);
 
-    x += Math.cos(angle) * windPush;
-    this.waterfallX -= (this.waterfallX - x) * ((amountOfDropParticles / amountOfParticles) * followTrailForWindAmount);
-    y += Math.sin(angle) * windPush;
-
+    const xMove = Math.cos(angle) * windPush;
+    x += xMove;
+    this.waterfallX -= (this.waterfallX - x) * followTrailForWindAmount;
+    
+    let yMove = Math.sin(angle) * windPush;
     // Apply air resistance to water particles that venture far out on the x.
     const airYPush = Math.pow(Math.abs(this.waterfallX - x), airResistance);
+
     y -= airYPush;
-    const size = minParticleSize + (seeder.random() * (maxParticleSize - minParticleSize));
+    y += yMove;
 
     if (x > 0 && x < viewWidth && y < viewHeight && y > 0) {
-      svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('stroke', Particle.createRandomParticleColor(seeder)).style('stroke-width', 1);
+      // if (Math.random() > 0.99) {
+      //   console.log('(Math.pow(xMove, seeder.random()) * (xMove > 0 ? 1 : -1))', xMove, (Math.pow(xMove, seeder.random()) * (xMove > 0 ? 1 : -1)));
+      // }
+      if (chanceOfLineParticles && seeder.random() > 1 - chanceOfLineParticles) {
+        const x2 = x + (Math.pow(Math.abs(xMove), seeder.random()) * (xMove > 0 ? 1 : -1)) * lineDistanceToWindRatio;
+        yMove -= airYPush / 10;
+        const y2 = y + (Math.pow(Math.abs(yMove), seeder.random()) * (yMove > 0 ? 1 : -1)) * lineDistanceToWindRatio;
+        svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x2).attr('y2', y2).style('stroke', Particle.createRandomParticleColor(seeder)).style('stroke-width', 0.5);
+      } else {
+        const size = minParticleSize + (seeder.random() * (maxParticleSize - minParticleSize));
+        svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('fill', Particle.createRandomParticleColor(seeder));// .style('stroke-width', 1);
+      }
     }
     // return new Particle(x, y, size);
   }
@@ -197,7 +219,10 @@ export default class Waterfall {
 
       minParticleSize,
       maxParticleSize,
-      ploomParticleSizeRatio
+      ploomParticleSizeRatio,
+
+      chanceOfLineParticlesPloom,
+      lineDistanceToWindRatio
     } = WaterfallStaticProperties;
 
     const ploomXSpreadMax = xSpreadMax * ploomXSpreadRatioToNormal;
@@ -223,13 +248,20 @@ export default class Waterfall {
 
     windPush *= ploomWindPowerRatio;
 
-    x += Math.cos(angle) * windPush;
-    y += Math.sin(angle) * windPush;
-
-    const size = ploomParticleSizeRatio * (minParticleSize + (seeder.random() * (maxParticleSize - minParticleSize)));
+    const xMove = Math.cos(angle) * windPush;
+    x += xMove;
+    const yMove = Math.sin(angle) * windPush;
+    y += yMove;
 
     if (x > 0 && x < viewWidth && y < viewHeight && y > 0) {
-      svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('stroke', Particle.createRandomPloomParticleColor(seeder)).style('stroke-width', 1);
+      if (chanceOfLineParticlesPloom && seeder.random() > 1 - chanceOfLineParticlesPloom) {
+        const x2 = x + (Math.pow(Math.abs(xMove), seeder.random()) * (xMove > 0 ? 1 : -1)) * lineDistanceToWindRatio;
+        const y2 = y + (Math.pow(Math.abs(yMove), seeder.random()) * (yMove > 0 ? 1 : -1)) * lineDistanceToWindRatio;
+        svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x2).attr('y2', y2).style('stroke', Particle.createRandomPloomParticleColor(seeder)).style('stroke-width', 0.5);
+      } else {
+        const size = ploomParticleSizeRatio * (minParticleSize + (seeder.random() * (maxParticleSize - minParticleSize)));
+        svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('fill', Particle.createRandomPloomParticleColor(seeder));// .style('stroke-width', 1);
+      }
     }
 
     // const newParticle = new Particle(x, y, size);
