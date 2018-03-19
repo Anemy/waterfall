@@ -23,7 +23,7 @@ export class WaterfallStaticProperties {
 
   static sidePaddingRatioToWidth = 0.25;
 
-  static maxParticles = 160000;
+  static maxParticles = 200000;
   static minParticles = 20000;
   // Negative it's usually a max particle, higher numbers are closer to min.
   // 0 is random
