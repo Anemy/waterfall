@@ -8,9 +8,16 @@ export default class Particle {
     // h: [90, 40], // Greenish
     // s: [0, 50],
     // l: [0, 50]
+
+    // Whiteish
+    // h: [0, 360],
+    // s: [0, 10],
+    // l: [66, 34]
+
+    // Blackish
     h: [0, 360],
     s: [0, 10],
-    l: [66, 34]
+    l: [0, 34]
   }
 
   static ploomColorRange = Particle.colorRange || {

@@ -6,6 +6,10 @@ import { createWaterfalls } from './utils/layout';
 
 import Shapes from './components/Shapes';
 
+import {
+  RenderProperties
+} from './utils/config';
+
 const waterfallUpdateTimer = 10;
 
 class App extends Component {
@@ -51,10 +55,17 @@ class App extends Component {
     this.lastUpdate = Date.now();
 
     let stillMakingParticles = 0;
-    const svg = d3.select('svg');
+    let renderPlatform;
+
+    if (RenderProperties.renderToSVG) {
+      renderPlatform = d3.select('svg');
+    } else {
+      const canvas = document.getElementById('js-waterfall-canvas');
+      renderPlatform = canvas.getContext('2d');
+    }
 
     _.each(this.state.waterfalls, waterfall => {
-      const newFallParticles = waterfall.createAndDrawNewParticles(svg);
+      const newFallParticles = waterfall.createAndDrawNewParticles(renderPlatform);
 
       if (newFallParticles) {
         stillMakingParticles += 1;
@@ -86,6 +97,8 @@ class App extends Component {
       || document.documentElement.clientHeight
       || document.body.clientHeight;
 
+    height -= 20;
+
     this.setState({
       particles: [],
       waterfalls: createWaterfalls(width, height),
@@ -100,9 +113,25 @@ class App extends Component {
       this.setState({
         particles: []
       });
-      d3.select('svg').selectAll('*').remove();
+
+      if (RenderProperties.renderToSVG) {
+        d3.select('svg').selectAll('*').remove();
+      } else {
+        const canvas = document.getElementById('js-waterfall-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, width, height);
+      }
     }
     this.particleMaker = setInterval(this.updateWaterfalls, waterfallUpdateTimer);
+  }
+
+  downloadImage = () => {
+    const canvas = document.getElementById('js-waterfall-canvas');
+
+    const link = document.getElementById('link');
+    link.setAttribute('download', 'MintyPaper.png');
+    link.setAttribute('href', canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream'));
+    link.click();
   }
 
   updateCounter = 0;
@@ -116,7 +145,9 @@ class App extends Component {
 
     return (
       <div className="App">
-        <svg height={height} width={width} className="waterfall-shapes"/>
+        <a id="link"></a><div><button onClick={this.downloadImage}>Download</button></div>
+        {RenderProperties.renderToSVG && <svg height={height} width={width} className="waterfall-shapes"/>}
+        {!RenderProperties.renderToSVG && <canvas height={height} width={width} id="js-waterfall-canvas" className="waterfall-shapes"/>}
         {/* <Shapes
           shapes={particles}
           height={height}

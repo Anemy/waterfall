@@ -29,11 +29,14 @@
 
 .waterfall-shapes {
   /* background: white; */
-  background: rgb(38, 35, 36);
+  /* background: rgb(38, 35, 36); */
+  background: #fafafa;
+
+  /* background: purple; */
 
   /* Dark */
-  background: -webkit-radial-gradient(ellipse at top, rgb(41, 38, 44), rgb(38, 35, 36));
-  background: radial-gradient(ellipse at top, rgb(41, 38, 44), rgb(38, 35, 36));
+  /* background: -webkit-radial-gradient(ellipse at top, rgb(41, 38, 44), rgb(38, 35, 36));
+  background: radial-gradient(ellipse at top, rgb(41, 38, 44), rgb(38, 35, 36)); */
 
   /* Lightish blue */
   /* background: -webkit-radial-gradient(ellipse at top, #466a87, #2f597d);

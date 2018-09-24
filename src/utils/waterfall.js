@@ -9,50 +9,10 @@ import {
   randomNegativeLog
 } from './random';
 
-export class WaterfallStaticProperties {
-  // Logarithmic - When this is a high number than the farther the particle
-  // ventures from the x axis the more it goes up!
-  static airResistance = 1.1;
-  // 0 there's no chance, 1 it'll always hit.
-  static randomWinResistanceChance = 0.7;
-  static windPower = 12;
-  // 1 it has the same windPower, 0 none
-  static ploomWindPowerRatio = 0.7;
-  static windGridsInX = 6;
-  static windGridsInY = 6;
-
-  static sidePaddingRatioToWidth = 0.25;
-
-  static maxParticles = 200000;
-  static minParticles = 20000;
-  // Negative it's usually a max particle, higher numbers are closer to min.
-  // 0 is random
-  static particleAmountTrend = 0.001;
-  // 0 is no particles in ploom - 1 is all of them
-  static particlesInPloomRatio = 0.5;
-
-  static minXSpreadRatioToWidth = 0.01;
-  static maxXSpreadRatioToWidth = 0.07;
-  static xSpreadDeviation = 1.1;
-
-  // The trail can deviate this far over the course of it's life.
-  static maxTrailFollowWindAmountToWidth = 0.01;
-
-  static ploomXSpreadRatioToNormal = 4;
-  static ploomXSpreadDeviation = 0.7;
-
-  static particlesToDrawPerCycle = 100;
-
-  static minParticleSize = 0.1;
-  static maxParticleSize = 0.8;
-
-  // Times normal
-  static ploomParticleSizeRatio = 1.2;
-
-  static chanceOfLineParticles = 0.4;
-  static chanceOfLineParticlesPloom = 0.3;
-  static lineDistanceToWindRatio = 0.25;
-}
+import {
+  RenderProperties,
+  WaterfallStaticProperties
+} from './config';
 
 export default class Waterfall {
   constructor(viewWidth, viewHeight, rndSeeder, seed) {
@@ -191,10 +151,27 @@ export default class Waterfall {
         const x2 = x + (Math.pow(Math.abs(xMove), seeder.random()) * (xMove > 0 ? 1 : -1)) * lineDistanceToWindRatio;
         yMove -= airYPush / 10;
         const y2 = y + (Math.pow(Math.abs(yMove), seeder.random()) * (yMove > 0 ? 1 : -1)) * lineDistanceToWindRatio;
-        svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x2).attr('y2', y2).style('stroke', Particle.createRandomParticleColor(seeder)).style('stroke-width', 0.5);
+
+        if (RenderProperties.renderToSVG) {
+          svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x2).attr('y2', y2).style('stroke', Particle.createRandomParticleColor(seeder)).style('stroke-width', 0.5);
+        } else {
+          svg.strokeStyle = Particle.createRandomParticleColor(seeder);
+          svg.beginPath();
+          svg.moveTo(x, y);
+          svg.lineTo(x2, y2);
+          svg.closePath();
+          svg.stroke();
+        }
       } else {
         const size = minParticleSize + (seeder.random() * (maxParticleSize - minParticleSize));
-        svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('fill', Particle.createRandomParticleColor(seeder));// .style('stroke-width', 1);
+        if (RenderProperties.renderToSVG) {
+          svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('fill', Particle.createRandomParticleColor(seeder));// .style('stroke-width', 1);
+        } else {
+          svg.fillStyle = Particle.createRandomParticleColor(seeder);
+          svg.beginPath();
+          svg.arc(x, y, size, 0, 2*Math.PI);
+          svg.fill();
+        }
       }
     }
     // return new Particle(x, y, size);
@@ -257,10 +234,27 @@ export default class Waterfall {
       if (chanceOfLineParticlesPloom && seeder.random() > 1 - chanceOfLineParticlesPloom) {
         const x2 = x + (Math.pow(Math.abs(xMove), seeder.random()) * (xMove > 0 ? 1 : -1)) * lineDistanceToWindRatio;
         const y2 = y + (Math.pow(Math.abs(yMove), seeder.random()) * (yMove > 0 ? 1 : -1)) * lineDistanceToWindRatio;
-        svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x2).attr('y2', y2).style('stroke', Particle.createRandomPloomParticleColor(seeder)).style('stroke-width', 0.5);
+        
+        if (RenderProperties.renderToSVG) {
+          svg.append('line').attr('x1', x).attr('y1', y).attr('x2', x2).attr('y2', y2).style('stroke', Particle.createRandomPloomParticleColor(seeder)).style('stroke-width', 0.5);
+        } else {
+          svg.strokeStyle = Particle.createRandomParticleColor(seeder);
+          svg.beginPath();
+          svg.moveTo(x, y);
+          svg.lineTo(x2, y2);
+          svg.closePath();
+          svg.stroke();
+        }
       } else {
         const size = ploomParticleSizeRatio * (minParticleSize + (seeder.random() * (maxParticleSize - minParticleSize)));
-        svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('fill', Particle.createRandomPloomParticleColor(seeder));// .style('stroke-width', 1);
+        if (RenderProperties.renderToSVG) {
+          svg.append('circle').attr('cx', x).attr('cy', y).attr('r', size).style('fill', Particle.createRandomPloomParticleColor(seeder));// .style('stroke-width', 1);
+        } else {
+          svg.fillStyle = Particle.createRandomParticleColor(seeder);
+          svg.beginPath();
+          svg.arc(x, y, size, 0, 2 * Math.PI);
+          svg.fill();
+        }
       }
     }
 
